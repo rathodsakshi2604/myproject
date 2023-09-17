@@ -1,0 +1,38 @@
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 2.4.6
+      /_/
+
+Using Python version 3.7.0 (v3.7.0:1bf9cc5093, Jun 27 2018 04:59:51)
+SparkSession available as 'spark'.
+>>> df=spark.read.format("CSV").option("header","true").option("inferschema","true").load("file:///D:/cust1.csv")
+>>> df.show()
++----+------+----------+---+-------------------+
+| cid| cname|      city|amt|              cdate|
++----+------+----------+---+-------------------+
+|   1| karan|      pune|200|2020-02-01 00:00:00|
+|   2|rajesh|      pune|450|2020-02-01 00:00:00|
+|   3|ganesh|      null|560|2020-02-01 00:00:00|
+|   4| rohan|    mumbai|100|2020-02-01 00:00:00|
+|null|  rock|california| 25|2022-02-01 00:00:00|
++----+------+----------+---+-------------------+
+
+>>> df.printSchema()
+root
+ |-- cid: integer (nullable = true)
+ |-- cname: string (nullable = true)
+ |-- city: string (nullable = true)
+ |-- amt: integer (nullable = true)
+ |-- cdate: timestamp (nullable = true)
+
+>>> df1=df.select(df['cid'],df['cname'],df['city'],df['amt'].cast("double"),df['cdate'])
+>>> df1.printSchema()
+root
+ |-- cid: integer (nullable = true)
+ |-- cname: string (nullable = true)
+ |-- city: string (nullable = true)
+ |-- amt: double (nullable = true)
+ |-- cdate: timestamp (nullable = true)

@@ -1,0 +1,205 @@
+hive> create database org;
+OK
+Time taken: 0.865 seconds
+hive> show databases;
+OK
+default
+org
+Time taken: 0.408 seconds, Fetched: 2 row(s)
+hive> use org;
+OK
+Time taken: 0.064 seconds
+hive> create table emp (cid int,cname string,city string, pin string)
+    > row format delimited
+    > fields terminated by ',';
+OK
+Time taken: 0.804 seconds
+hive> show tables;
+OK
+emp
+Time taken: 0.056 seconds, Fetched: 1 row(s)
+hive> create table cust (cid int,cname string,city string, pin string)
+    > row format delimited
+    > fields terminated by ',';
+OK
+Time taken: 0.072 seconds
+hive> desc cust;
+OK
+cid                     int
+cname                   string
+city                    string
+pin                     string
+Time taken: 0.078 seconds, Fetched: 4 row(s)
+hive> show create table cust;
+OK
+CREATE TABLE `cust`(
+  `cid` int,
+  `cname` string,
+  `city` string,
+  `pin` string)
+ROW FORMAT SERDE
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES (
+  'field.delim'=',',
+  'serialization.format'=',')
+STORED AS INPUTFORMAT
+  'org.apache.hadoop.mapred.TextInputFormat'
+OUTPUTFORMAT
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://ip-172-31-26-94.ap-south-1.compute.internal:8020/user/hive/warehouse/org.db/cust'
+TBLPROPERTIES (
+  'transient_lastDdlTime'='1686672880')
+Time taken: 0.099 seconds, Fetched: 18 row(s)
+hive> [hadoop@ip-172-31-26-94 ~]$
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -ls /user
+Found 4 items
+drwxrwxrwx   - hadoop hdfsadmingroup          0 2023-06-13 16:09 /user/hadoop
+drwxr-xr-x   - mapred mapred                  0 2023-06-13 15:57 /user/history
+drwxrwxrwx   - hdfs   hdfsadmingroup          0 2023-06-13 15:57 /user/hive
+drwxrwxrwx   - root   hdfsadmingroup          0 2023-06-13 15:57 /user/root
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -ls /user/hive
+Found 1 items
+drwxrwxrwt   - hdfs hdfsadmingroup          0 2023-06-13 16:10 /user/hive/warehouse
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -ls /user/hive/warehouse
+Found 1 items
+drwxrwxrwt   - hadoop hdfsadmingroup          0 2023-06-13 16:14 /user/hive/warehouse/org.db
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -ls /user/hive/warehouse/org.db
+Found 2 items
+drwxrwxrwt   - hadoop hdfsadmingroup          0 2023-06-13 16:14 /user/hive/warehouse/org.db/cust
+drwxrwxrwt   - hadoop hdfsadmingroup          0 2023-06-13 16:13 /user/hive/warehouse/org.db/emp
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -ls /user/hive/warehouse/org.db/cust
+[hadoop@ip-172-31-26-94 ~]$ vi cust.csv
+[hadoop@ip-172-31-26-94 ~]$ cat cust.csv
+cat: cust.csv: No such file or directory
+[hadoop@ip-172-31-26-94 ~]$ vi cust.csv
+[hadoop@ip-172-31-26-94 ~]$ cat cust.csv
+1001,Shubham,Pune,414 002
+1002,Ganesh,Mumbai,414 003
+1003,Rohit,Pune,414 002
+1004,Mangesh,Ahmednagar,414 001
+1005,Pratik,Mumbai,414 002
+1006,Chetan,Thane,414 004
+1007,Hitesh,Solapur,414 005
+1008,Mahesh,Ahmednagar,414 001
+1009,Yogesh,Solapur,414 005
+1010,Rushabh,Thane,414 004
+
+hive> load data inpath '/cust.csv' into table org.cust;
+Loading data to table org.cust
+OK
+Time taken: 1.136 seconds
+hive> select * from cust;
+FAILED: SemanticException [Error 10001]: Line 1:14 Table not found 'cust'
+hive> use org;
+OK
+Time taken: 0.346 seconds
+hive> select * from cust;
+OK
+1001    Shubham Pune    414 002
+1002    Ganesh  Mumbai  414 003
+1003    Rohit   Pune    414 002
+1004    Mangesh Ahmednagar      414 001
+1005    Pratik  Mumbai  414 002
+1006    Chetan  Thane   414 004
+1007    Hitesh  Solapur 414 005
+1008    Mahesh  Ahmednagar      414 001
+1009    Yogesh  Solapur 414 005
+1010    Rushabh Thane   414 004
+Time taken: 1.275 seconds, Fetched: 10 row(s)
+
+hive> select * from cust where city='Mumbai';
+OK
+1002    Ganesh  Mumbai  414 003
+1005    Pratik  Mumbai  414 002
+Time taken: 1.854 seconds, Fetched: 2 row(s)
+hive> set hive.cli.print.header=true;
+hive> select * from cust;
+OK
+cust.cid        cust.cname      cust.city       cust.pin
+1001    Shubham Pune    414 002
+1002    Ganesh  Mumbai  414 003
+1003    Rohit   Pune    414 002
+1004    Mangesh Ahmednagar      414 001
+1005    Pratik  Mumbai  414 002
+1006    Chetan  Thane   414 004
+1007    Hitesh  Solapur 414 005
+1008    Mahesh  Ahmednagar      414 001
+1009    Yogesh  Solapur 414 005
+1010    Rushabh Thane   414 004
+Time taken: 0.284 seconds, Fetched: 10 row(s)
+
+[hadoop@ip-172-31-26-94 ~]$ hive
+
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j2.properties Async: true
+hive> [hadoop@ip-172-31-26-94 ~]$
+[hadoop@ip-172-31-26-94 ~]$
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -mkdir /emp_op
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -put cust.csv /emp_op
+[hadoop@ip-172-31-26-94 ~]$ hadoop fs -ls /emp_op
+Found 1 items
+-rw-r--r--   1 hadoop hdfsadmingroup        276 2023-06-13 16:49 /emp_op/cust.csv
+[hadoop@ip-172-31-26-94 ~]$ hive
+
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j2.properties Async: true
+hive> use org;
+OK
+Time taken: 0.677 seconds
+
+hive> create external table cust_1 (cid int,cname string,city string, pin string)
+    > row format delimited
+    > fields terminated by ','
+    > location '/emp_op/';
+OK
+Time taken: 0.042 seconds
+hive> select * from cust_1;
+OK
+1001    Shubham Pune    414 002
+1002    Ganesh  Mumbai  414 003
+1003    Rohit   Pune    414 002
+1004    Mangesh Ahmednagar      414 001
+1005    Pratik  Mumbai  414 002
+1006    Chetan  Thane   414 004
+1007    Hitesh  Solapur 414 005
+1008    Mahesh  Ahmednagar      414 001
+1009    Yogesh  Solapur 414 005
+1010    Rushabh Thane   414 004
+Time taken: 1.683 seconds, Fetched: 10 row(s)
+
+hive> select city from cust_1;
+OK
+Pune
+Mumbai
+Pune
+Ahmednagar
+Mumbai
+Thane
+Solapur
+Ahmednagar
+Solapur
+Thane
+Time taken: 0.135 seconds, Fetched: 10 row(s)
+hive> select * from cust_1 where city is not null;
+OK
+1001    Shubham Pune    414 002
+1002    Ganesh  Mumbai  414 003
+1003    Rohit   Pune    414 002
+1004    Mangesh Ahmednagar      414 001
+1005    Pratik  Mumbai  414 002
+1006    Chetan  Thane   414 004
+1007    Hitesh  Solapur 414 005
+1008    Mahesh  Ahmednagar      414 001
+1009    Yogesh  Solapur 414 005
+1010    Rushabh Thane   414 004
+Time taken: 0.163 seconds, Fetched: 10 row(s)
+
+hive> select * from cust_1 where cid='1001' and pin='414 002';
+OK
+1001    Shubham Pune    414 002
+Time taken: 0.113 seconds, Fetched: 1 row(s)
+
+hive> select * from cust_1 where city='ahmednagar' and pin='414 001';
+OK
+1004    Mangesh Ahmednagar      414 001
+1008    Mahesh  Ahmednagar      414 001
+Time taken: 0.119 seconds, Fetched: 2 row(s)
